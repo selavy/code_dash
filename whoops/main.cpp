@@ -1,121 +1,133 @@
-#include <iostream>
+#include <cstddef>
 #include <string>
-#include <vector>
-#include <cstdlib>
+#include <iterator>
+#include <iostream>
+#include <sstream>
 #include <algorithm>
+#include <vector>
+#include <unordered_map>
 
-typedef std::vector<std::string> players_t;
-typedef players_t::iterator players_it;
-typedef players_t::const_iterator players_cit;
-typedef std::vector<int> scores_t;
-typedef scores_t::iterator scores_it;
-typedef scores_t::const_iterator scores_cit;
+typedef int32_t scalar_t;
+typedef std::vector<std::string> names_t;
+typedef names_t::iterator names_it;
 
-typedef bool direction_t;
-#define FORWARD true
-#define BACKWARD false
-
-void whoops() { std::cout << "Whoops!"; }
-
-bool contains_seven(int n) { 
-  while(n > 1) {
-    if (n % 10 == 7) { return true; }
+bool contain_seven(scalar_t n) {
+  while (n > 6) {
+    if (n % 10 == 7) return true;
     n /= 10;
   }
   return false;
 }
-
-bool sum_digits(int n) {
+bool divisible_by_seven(scalar_t n) { return n % 7 == 0; }
+bool sum_is_seven(scalar_t n) {
   int sum = 0;
-  while(n > 0) {
+  while (n > 0) {
     sum += n % 10;
     n /= 10;
   }
-  return sum % 7 == 0;
+  return sum == 7;
 }
 
-void play_game(players_t& players, int games) {
+void whoops(bool& dir, bool& w) { std::cout << "Whoops!"; dir ^= true; w = true; }
+
+// Whoops on:
+// containing a 7
+// divisible by 7
+// sum of digits = 7
+void play_game(const names_t& names, scalar_t games) {
+  int player = 0;
+  int num_players = names.size();
+  typedef std::unordered_map<std::string, scalar_t> scores_t;
   scores_t scores;
-  scores.resize(players.size());
-  size_t pos = 0;
-  for (int i = 0; i < games; ++i) {
-    direction_t direction = FORWARD;
-    int n = 1;
-    bool lose = false;
-    bool last_whoops = false;
-    while (!lose) {
-      std::cout << players[pos] << "-";
-      if (contains_seven(n)) {
-	if (players[pos] == "Michael") {
-	  std::cout << n; lose = true; scores[pos]++;
-	} else if (players[pos] == "JR") {
-	  std::cout << n; lose = true; scores[pos]++;
-	} else {
-	  whoops(); direction ^= FORWARD; ++n; last_whoops = true;
-	}
-      } else if (n % 7 == 0) {
-	if (players[pos] == "Tim") {
-	  std::cout << n; lose = true; scores[pos]++;
-	} else if (players[pos] == "JR") {
-	  std::cout << n; lose = true; scores[pos]++;
-	} else {
-	  whoops(); direction ^= FORWARD; ++n; last_whoops = true;
-	}
-      } else if (sum_digits(n)) {
-	if (players[pos] == "JR") {
-	  std::cout << n; lose = true; scores[pos]++;
-	} else if (players[pos] == "Lyndsey") {
-	  std::cout << n; lose = true; scores[pos]++;
-	} else {
-	  whoops(); direction ^= FORWARD; ++n; last_whoops = true;
-	}
-      } else { 
-	if (players[pos] == "Richard" && last_whoops) {
-	  lose = true; scores[pos]++;
-	} else {
-	  std::cout << n; ++n;
-	}
-	last_whoops = false;
+  for_each(names.begin(), names.end(), [&scores](const std::string& it) { scores.insert(std::make_pair(it, 0));});
+
+  for (int g = 0; g < games; ++g) {
+  int n = 1;
+  bool dir = true;
+  bool w = false;
+  bool wrong = false;
+  for (;!wrong;) {
+    std::string p = names[player];
+    std::cout << p << "-";
+
+    if (w && p == "Richard") {
+      wrong = true;
+      scores[p]++;
+    } else {
+      bool cs = contain_seven(n);
+      bool ds = divisible_by_seven(n);
+      bool ss = sum_is_seven(n);
+      if (p == "JR" && (cs || ds || ss)) {
+	std::cout << n; wrong = true; scores[p]++;
+      } else if (cs && !ds && !ss && p == "Michael") {
+	std::cout << n; wrong = true; scores[p]++;
+      } else if (!cs && ds && !ss && p == "Tim") {
+	std::cout << n; wrong = true; scores[p]++;
+      } else if (!cs && !ds && ss && p == "Lyndsey") {
+	std::cout << n; wrong = true; scores[p]++;
+      } else if (cs || ds || ss) {
+	whoops(dir, w);
+      } else {
+	w = false;
+	std::cout << n;
       }
-      std::cout << std::endl;
-    
-      if(!lose) {
-	if (direction == FORWARD) {
-	  pos = (pos + 1) % players.size();
-	} else {
-	  pos = (pos == 0 ? players.size() - 1 : pos - 1);
-	}
-      }
-      // safety catch
-      if (n > 1000) { lose = true; }
-      if (lose) { std::cout << "END OF ROUND" << std::endl; }
     }
 
+    //   if (p == "Michael" || p == "JR") {
+    // 	std::cout << n;
+    // 	wrong = true;
+    // 	scores[p]++;
+    //   } else {
+    // 	whoops(dir, w);
+    //   }
+    // } else if (divisible_by_seven(n)) {
+    //   if (p == "Tim" || p == "JR") {
+    // 	std::cout << n;
+    // 	wrong = true;
+    // 	scores[p]++;
+    //   } else {
+    // 	whoops(dir, w); 
+    //   }
+    // } else if (sum_is_seven(n)) {
+    //   if (p == "Lyndsey" || p == "JR") {
+    // 	std::cout << n;
+    // 	wrong = true;
+    // 	scores[p]++;
+    //   } else {
+    // 	whoops(dir, w);
+    //   }
+    // } else {
+    //   w = false;
+    //   std::cout << n;
+    // }
+    ++n;
+    std::cout << std::endl;
+    // go to next player
+    if(!wrong) {
+      if (dir) { player = (player + 1) % num_players; }
+      else { player = ((player == 0) ? num_players - 1 : player - 1); }
+    }
   }
-  players_cit player = players.begin();
-  for (scores_cit it = scores.begin(); it != scores.end(); ++it, ++player) {
-    std::cout << *player << ": " << *it << std::endl;
+  std::cout << "END OF ROUND" << std::endl;
   }
+
+  for_each(names.begin(), names.end(), [&scores](const std::string& it) {
+      std::cout << it << ": " << scores[it] << std::endl;
+    });
   std::cout << "--" << std::endl;
 }
 
 int main(int argc, char ** argv) {
   std::string line;
-  while(getline(std::cin, line)) {
-    players_t players;
-    auto pos = 0;
-    auto ppos = 0;
-    pos = line.find(' ');
-    while(pos != std::string::npos) {
-      players.push_back(line.substr(ppos, pos-ppos));
-      ppos = pos+1;
-      pos = line.find(' ', ppos);
-    }
-    players.push_back(line.substr(ppos));
-    int games = 0;
-    getline(std::cin, line);
-    games = std::stoi(line.c_str(), NULL, 10);
-    play_game(players, games);
+  while (getline(std::cin, line)) {
+    names_t names;
+    std::istringstream iss(line);
+    names.insert(names.begin(), 
+		 std::istream_iterator<std::string>(iss),
+		 std::istream_iterator<std::string>());
+    if(!getline(std::cin, line)) { return 0; }
+    scalar_t games = std::stoi(line, nullptr);
+    play_game(names, games);
   }
   return 0;
 }
