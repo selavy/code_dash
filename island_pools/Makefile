@@ -1,8 +1,10 @@
-all: a.out
-	./a.out < input.txt
-	./a.out < input2.txt > my_output
-	diff my_output output2.txt
+run: a.out
+	./a.out < input.in
+official: a.out
+	./a.out < input.official > myoutput
+	diff myoutput output.offical
 a.out: main.cpp
-	g++ -std=c++11 main.cpp
+	g++ -g -std=c++11 main.cpp
+.PHONY: clean
 clean:
 	rm -rf a.out

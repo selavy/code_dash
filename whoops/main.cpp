@@ -72,34 +72,6 @@ void play_game(const names_t& names, scalar_t games) {
 	std::cout << n;
       }
     }
-
-    //   if (p == "Michael" || p == "JR") {
-    // 	std::cout << n;
-    // 	wrong = true;
-    // 	scores[p]++;
-    //   } else {
-    // 	whoops(dir, w);
-    //   }
-    // } else if (divisible_by_seven(n)) {
-    //   if (p == "Tim" || p == "JR") {
-    // 	std::cout << n;
-    // 	wrong = true;
-    // 	scores[p]++;
-    //   } else {
-    // 	whoops(dir, w); 
-    //   }
-    // } else if (sum_is_seven(n)) {
-    //   if (p == "Lyndsey" || p == "JR") {
-    // 	std::cout << n;
-    // 	wrong = true;
-    // 	scores[p]++;
-    //   } else {
-    // 	whoops(dir, w);
-    //   }
-    // } else {
-    //   w = false;
-    //   std::cout << n;
-    // }
     ++n;
     std::cout << std::endl;
     // go to next player

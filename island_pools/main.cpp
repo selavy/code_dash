@@ -1,81 +1,65 @@
 #include <iostream>
 #include <string>
-#include <sstream>
 #include <vector>
+#include <sstream>
 #include <algorithm>
-#include <cassert>
-#include <utility>
+#include <iterator>
 
 typedef std::vector<int> island_t;
 typedef island_t::iterator island_it;
-typedef island_t::reverse_iterator island_rit;
 
-std::pair<int,int> sub(island_t& island, int& answer) {
-  assert(island.size() > 0);
-  int left = 0;
-  int right = island.size() - 1;
-  while (right - left > 1) {
-    if (island[left] < island[left+1]) ++left;
-    else break;
-  }
-  while (right - left > 1) {
-    if (island[right] < island[right-1]) --right;
-    else break;
-  }
-
-  int dist = right - left - 1;
-  int height = (island[left] < island[right] ? island[left] : island[right]);
-  int area = dist * height;
-
-  for (int i = left + 1; i < right; ++i) {
-    area -= (island[i] < height) ? island[i] : height;
-  }  
-
-  for (int i = left; i < island.size(); ++i) {
-    if (island[i] > height) island[i] -= height;
-    else island[i] = 0;
-  }
-
-  answer += area;
-  return std::make_pair(0,0);
-}
+struct not_num {
+  bool operator()(const char& c) { return (c < '0' || c > '9') && (c != '-'); }
+};
+struct valid {
+  static not_num n;
+  bool operator()(const std::string& str) { return !std::none_of(str.begin(), str.end(), n);}
+};
+not_num valid::n;
+void invalid() { std::cout << "Invalid input" << std::endl; }
 
 void solve(island_t& island) {
-  int answer = 0;
-  sub(island, answer);
-  std::cout << answer << std::endl;
+  std::pair<island_it,island_it> minmax = std::minmax_element(island.begin(), island.end());
+  int min = *(minmax.first);
+  int max = *(minmax.second);
+  int pools = 0;
+  island_it end = island.end();
+  island_it a;
+  bool aset = false;
+  for (int level = max; level > min; --level) {
+    for (island_it it = island.begin(); it != end; ++it) {
+      if(!aset && *it >= level) {
+	aset = true; a = it;
+      } else if (aset && *it >= level) {
+	pools += std::distance(a,it) - 1; a = it;
+      }
+    }
+    aset = false;
+  }
+  std::cout << pools << std::endl;
 }
 
-void invalid_input() { std::cout << "Invalid input" << std::endl; }
-
-bool not_number(char& c) { return (c < '0' || c > '9') && c != '-'; }
-
-int main(int argc, char **argv) {
+int main(int argc, char ** argv) {
   std::string line;
- outer: while (getline(std::cin, line)) {
-        std::stringstream ss;
-        island_t island;
-        int n;
-	int size;
-        ss << line;
-	ss >> line;
-	if (!std::none_of(line.begin(), line.end(), not_number)) {
-	  invalid_input();
-	  goto outer;
-	}
-	size = stoi(line);
-	if (size == 0) { break; }
-        while(ss >> line) {
-            if (!std::none_of(line.begin(), line.end(), not_number)) {
-                invalid_input();
-                goto outer;
-            }
-            n = stoi(line);
-            island.push_back(n);
-        }
-        if (island.empty()) { invalid_input(); goto outer; }
-	if (island.size() != size) { invalid_input(); goto outer; }
-        solve(island);
+  while (getline(std::cin, line)) {
+    std::vector<std::string> vals;
+    island_t island;
+    std::istringstream iss(line);
+    vals.insert(vals.begin(),
+  	     std::istream_iterator<std::string>(iss),
+  	     std::istream_iterator<std::string>());
+    int size = stoi(vals[0]);
+    if (size == 0) { return 0; }
+    if (size != (vals.size() - 1)) { invalid(); continue; }
+    valid v;
+    if (!std::none_of(vals.begin() + 1, vals.end(), v)) { invalid(); continue; }
+    else {
+      island_t island;
+      std::for_each(vals.begin() + 1, vals.end(), [&island](const std::string& s) {
+	  island.push_back(stoi(s));
+	});
+      solve(island);
     }
-    return 0;
+  }
+  return 0;
 }
