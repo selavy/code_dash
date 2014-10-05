@@ -1,0 +1,5 @@
+The simplest example of arithmetic progress is 1, 2, 3, 4, 5 and so on.  A well-known geometric
+progression is: 1, 2, 4, 8, 16, 32, 64... Some arithmetic progress may grow fast, like 1, 1001, 2001, 3000,
+4001.  Geometric progression may start slow, but in the end they will win, for example: 2, 6, 18, 54, 162,
+486, 1458, 4474, 13122, 39366, 118098, 354294, 1062882, 3188646, 9565938, 28679814, 86093442, 25
+8280326 and then 774840978 gets you in less than twenty steps close to a billion.

@@ -1,0 +1,5 @@
+1. Line 1: arithmetic: 5 terms, 0 errors
+2. Line 2: geometric: 7 terms, 0 errors
+3. Line 2: arithmetic: 5 terms, 1 error: 3000: 3001
+4. Line 3: geometric: 19 terms, 2 errors: 4474: 4374, 28679814: 28697814
+Total of 2 arithmetic and 2 geometric progressions, total of 3 errors.
