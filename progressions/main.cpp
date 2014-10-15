@@ -5,42 +5,35 @@
 #include <cstddef>
 #include <cassert>
 #include <climits>
+#include <algorithm>
+#include <functional>
 
-template<int64_t N> struct length_of;
+class num_t {
+private:
+  typedef std::vector<int> digits_t;
+  typedef digits_t::iterator digits_it;
+  
+  digits_t digits_;
 
-template<> struct length_of<0> { enum { length = 1 }; };
+public:
+  num_t() : digits_() {}
+  num_t(const std::string& s) : digits_() { std::transform(s.begin(), s.end(), std::back_inserter(digits_), [](const char& c) { return c - '0'; }); }
+  num_t(int64_t n) : digits_() { if (n == 0) { digits_.push_back(0); return; } while (n > 0) { digits_.push_back(n % 10); n /= 10; } std::reverse(digits_.begin(), digits_.end()); }
+  const std::string to_str() const { std::string str; std::for_each(digits_.begin(), digits_.end(), [&str](const int& i) { str.push_back(i+'0'); }); return str; }
+  num_t(const num_t& n) : digits_(n.digits_) {}
+  num_t(num_t&& n) : digits_(std::move(n.digits_)) {}
+  void swap(num_t& n) { std::swap(n.digits_, digits_); }
+  num_t& operator=(const num_t& n) { if (&n == this) { return *this; } num_t tmp(n); tmp.swap(*this); return(*this); }
 
-template <int64_t N>
-struct length_of {
-  enum { length = 1 + (N / 10 > 0 ? length_of<N / 10>::length : 0) };
+  const num_t operator*(int64_t n) {
+    for (digits_it it = digits_.begin(); it != digits_.end(); ++it) {
+      *it *= n;
+    }
+    std::cout << "Digits: ";
+    std::for_each(digits_.begin(), digits_.end(), [](const int& i) {std::cout << i << " ";});
+    std::cout << std::endl;
+  }
 };
-
-
-// struct BigNum {
-//   BigNum() : str_(), too_big_(false), n_(0) {}
-
-//   explicit BigNum(int64_t n) : str_(std::to_string(n)), n_(n), too_big_(false) {
-//   }
-//   explicit BigNum(std::string str) : str_(str), too_big_(true) {
-//     if (str.length() < (length_of<LLONG_MAX>::length - 1)) {
-//       too_big_ = false;
-//       n_ = stoll(str);
-//     }
-//   }
-//   ~BigNum() {}
-//   std::string to_str() const {
-//     return str_;
-//   }
-//   BigNum& 
-// private:
-//   friend std::ostream& operator<< (std::ostream& os, const BigNum& n) {
-//     os << n.to_str();
-//     return os;
-//   }
-//   std::string str_;
-//   int64_t n_;
-//   bool too_big_;
-// };
 
 enum type_t { ARITHMETIC = 0, GEOMETRIC };
 typedef int64_t scalar_t;
@@ -142,12 +135,12 @@ std::ostream& solve(std::ostream& os, int line, series_t& series) {
 }
 
 int main(int argc, char ** argv) {
-  // BigNum b(0);
-  // std::cout << b << std::endl;
-  // BigNum c(std::string("0"));
-  // std::cout << c << std::endl;
-  // return 0;
-
+  num_t t("123456789101112131415");
+  std::cout << t.to_str() << std::endl;
+  t = t * 9;
+  
+  //  std::cout << t.to_str() << std::endl;
+  return 0;
 
   std::string line;
   series_t series;
